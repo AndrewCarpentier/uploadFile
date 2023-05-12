@@ -11,21 +11,8 @@ const cors = require("cors");
 const port = 8000;
 
 const multer = require("multer");
-// let Client = require('ssh2-sftp-client');
-// let sftp = new Client();
-
-// sftp.connect({
-//   host : 'preview.awardspace.net',
-//   port : 21,
-//   username : "4309606_eventmaster",
-//   password: "andrew62"
-// }).then(()=>{
-//   return sftp.list('/pathname');
-// }).then(data=>{
-//   console.log(data, 'the data info');
-// }).catch(err=>{
-//   console.log(err);
-// })
+const FTPStorage = require("multer-ftp");
+const FTP = require('ftp');
 
 const imageStorage = multer.diskStorage({
   destination: "uploads/images/",
@@ -36,6 +23,19 @@ const imageStorage = multer.diskStorage({
     );
   },
 });
+
+// const imageStorage = new FTPStorage({
+//   basepath: "",
+//   destination: function (req, file, options, callback) {
+//     callback(null, path.join(options.basepath, file.fieldname + "_" + Date.now() + path.extname(file.originalname)));
+//   },
+//   ftp: {
+//     host: "f28-preview.awardspace.net",
+//     secure: false,
+//     user: "4309606_eventmaster",
+//     password: "andrew62",
+//   },
+// });
 
 const videoStorage = multer.diskStorage({
   destination: "uploads/videos/",
@@ -100,13 +100,13 @@ app.get("/video/:filename", (req, res) => {
 
 app.post("/image", imageUpload.single("image"), (req, res) => {
   const { filename } = req.file.filename;
-  res.json(filename);
+  res.send(req.file);
 });
 
 app.post("/images", imageUpload.array("image", 10), (req, res) => {
   const filenames = [];
   req.files.map((file) => filenames.push(file.filename));
-  res.json(filenames);
+  res.send(req.file);
 });
 
 app.post("/video", videoUpload.single("video"), (req, res) => {

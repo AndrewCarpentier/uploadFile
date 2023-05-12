@@ -6,6 +6,9 @@ function App() {
   const [images, setImages] = useState(null);
   const [video, setVideo] = useState(null);
 
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+
   const onImageChange = (e) => {
     if (e.target.files.length > 1) {
       setImages(e.target.files);
@@ -26,9 +29,7 @@ function App() {
       fetch("http://localhost:8000/images", {
         method: "POST",
         body: data,
-      })
-        .then((res) => res.json())
-        .then((json) => console.log(json));
+      });
     } else {
       data.append("image", image);
       fetch("http://localhost:8000/image", {
@@ -36,7 +37,11 @@ function App() {
         body: data,
       })
         .then((res) => res.json())
-        .then((json) => json);
+        .then((json) => {
+          fetch(`http://localhost:8000/image/${json.filename}`).then((res) =>
+            setImageFile(res.url)
+          );
+        });
     }
   }
 
@@ -51,12 +56,30 @@ function App() {
     await fetch("http://localhost:8000/video", {
       method: "POST",
       body: data,
-    });
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        fetch(`http://localhost:8000/video/${json.filename}`).then((res) => {
+          setVideoFile("loading");
+          setTimeout(() => {
+            setVideoFile(res.url);
+          }, 100);
+        });
+      });
   }
 
   return (
     <div className={`d-flex flex-column ${styles.appContainer}`}>
       <div>
+        <img src={imageFile} alt="" width="400px" />
+        {videoFile != null ? videoFile === "loading" ? "Loading..." :  (
+          <video autoPlay controls width="400px">
+            <source src={videoFile} type="video/mp4"></source>
+          </video>
+        ) : (
+          ""
+        )}
+
         <div className="mb10">
           <form onSubmit={onSubmitImage}>
             <label htmlFor="image">
