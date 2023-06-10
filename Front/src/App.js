@@ -59,27 +59,27 @@ function App() {
     })
       .then((res) => res.json())
       .then((json) => {
-        fetch(`http://localhost:8000/video/${json.filename}`).then((res) => {
-          setVideoFile("loading");
-          setTimeout(() => {
-            setVideoFile(res.url);
-          }, 100);
+        setVideoFile(null);
+        setTimeout(() => {
+          setVideoFile(json.filename);
         });
-      });
+      }, 100);
   }
 
   return (
     <div className={`d-flex flex-column ${styles.appContainer}`}>
       <div>
         <img src={imageFile} alt="" width="400px" />
-        {videoFile != null ? videoFile === "loading" ? "Loading..." :  (
+        {videoFile ? (
           <video autoPlay controls width="400px">
-            <source src={videoFile} type="video/mp4"></source>
+            <source
+              src={`http://localhost:8000/video/${videoFile}`}
+              type="video/mp4"
+            ></source>
           </video>
         ) : (
           ""
         )}
-
         <div className="mb10">
           <form onSubmit={onSubmitImage}>
             <label htmlFor="image">
